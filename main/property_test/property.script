@@ -1,0 +1,65 @@
+local object_properties = require("shared_stats.shared_properties")
+local shared_states = require("shared_stats.shared_states")
+
+go.property("ammo", 50)
+go.property("test_2", hash("test_1"))
+
+local function touch(self, action_id, action)
+	--self.ammo = object_properties.update_property(self.key, "ammo", object_properties.get_property(self.key, "ammo") - 1)	
+	self.test_2 = object_properties.update_property(self.key, "test_2", hash("test_2"))
+	local action_machine = shared_states.get_machine(self.key, "action_machine")
+	if action_machine then
+		if action_machine:get_current_state() == "act" then
+			self.ammo = object_properties.update_property(self.key, "ammo", object_properties.get_property(self.key, "ammo") - 1)	
+			object_properties.update_property(self.key, "rage", object_properties.get_property(self.key, "rage") - 1)		
+		end
+	end
+	msg.post("#", "print")
+end
+
+-- function fixed_update(self, dt)
+-- 	msg.post("#", "print")
+-- end
+-- 
+function init(self)
+	
+	msg.post(".", "acquire_input_focus")
+	self.key = msg.url(".").path
+	self.ammo = object_properties.update_property(self.key, "ammo", self.ammo)
+	self.test_2 = object_properties.update_property(self.key, "test_2", self.test_2)
+	--object_properties.print_property(self.key, "rage")
+	
+	self.action_machine = shared_states.create_state_machine(self.key, "action_machine", "idle", {
+		shared_states.create_state_transition("idle", "act"),
+		shared_states.create_state_transition("act", "idle")
+	})
+	--pprint(shared_states.get_machine(self.key, "action_machine"):get_current_state())
+end
+
+function final(self)
+	object_properties.delete(self.key)
+	--object_properties.print_property(self.key, "rage")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("print") then
+		pprint(object_properties.get_object_properties(self.key))
+		-- local action_machine = shared_states.get_machine(self.key, "action_machine")
+		-- if action_machine then
+		-- 	if action_machine:get_current_state() == "act" then
+		-- 		print("acting all over the screen")
+		-- 	end
+		-- 	if action_machine:get_current_state() == "idle" then
+		-- 		print("idling all over the screen")
+		-- 	end
+		-- end
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("touch") then
+		touch(self, action_id, action)
+	end
+	
+end
+

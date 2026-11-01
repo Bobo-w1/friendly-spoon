@@ -1,0 +1,10 @@
+require("helpers.hashed")
+local function tab()
+	pprint(_G.hashed)
+	print(_G.hashed.touch)
+	
+end
+function init(self)
+	print("RUN")
+	tab()
+end

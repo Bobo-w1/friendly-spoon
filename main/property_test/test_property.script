@@ -1,0 +1,33 @@
+local stat_properties = require("shared_stats.shared_properties")
+local shared_states = require("shared_stats.shared_states")
+
+go.property("rage", 50)
+local function touch(self, action_id, action)
+	self.rage = stat_properties.update_property(self.key, "rage", stat_properties.get_property(self.key, "rage") - 1)		
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.key = msg.url(".").path
+	self.rage = stat_properties.update_property(self.key, "rage", self.rage)
+	--stat_properties.print_property(self.key, "ammo")
+	
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("touch") and action.pressed then
+		touch(self, action_id, action)
+	end
+	if action.pressed then
+		local action_machine = shared_states.get_machine(self.key, "action_machine")
+		if action_machine then
+			action_machine:set_state("act")
+		end
+	elseif action.released then
+		local action_machine = shared_states.get_machine(self.key, "action_machine")
+		if action_machine then
+			action_machine:set_state("idle")
+		end	
+	end
+end
+

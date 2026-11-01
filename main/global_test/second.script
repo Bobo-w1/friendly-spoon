@@ -1,0 +1,3 @@
+function init(self)
+	print(_G.hashed.touch)
+end
